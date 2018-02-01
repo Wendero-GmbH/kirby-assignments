@@ -1,0 +1,25 @@
+.assignable-field {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.assignable-field__user {
+  border-radius: 999px;
+  background-color: #52474d;
+  margin: 3px;
+  padding: 3px 10px;
+  cursor: pointer;
+  color: #fff;
+  transition: background-color 0.3s ease-in-out;
+}
+
+
+.assignable-field__user--done {
+  background-color: #74a237;
+}
+
+
+.assignable-field__user--incomplete {
+  background-color: #d26361;
+}
