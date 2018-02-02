@@ -21,7 +21,7 @@ function add(\User $user, $field, \Page $page) {
   if (false === $i) {
     array_push($copy, $page->uuid()->value);
     $user->update([
-      $field => $copy
+      $field => array_values($copy)
     ]);
   }
 }
@@ -41,7 +41,7 @@ function remove(\User $user, $field, \Page $page) {
 
     unset($copy[$i]);
     $user->update([
-      $field => $copy
+      $field => array_values($copy)
     ]);
   }
 }
