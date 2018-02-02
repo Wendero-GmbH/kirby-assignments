@@ -1,5 +1,5 @@
 .PHONY: build
 
 build:
-	pulp browserify --to ../fields/pageslist/assets/js/dist.js
+	pulp browserify -O --to ../fields/pageslist/assets/js/dist.js --skip-entry-point --standalone PageList
 

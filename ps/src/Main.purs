@@ -1,34 +1,41 @@
-module Main where
+module Main (main) where
 
+import Data.Either
+import Data.Lens
+import Data.Maybe
+import Data.Page
+import Data.Tuple
 import Prelude
 
-import Control.Monad.Eff (Eff)
-import Control.Monad.Aff (Aff, delay)
-import Data.Lens
-import Data.List as L
-import Data.Maybe
-import Data.Tuple
-import Data.Either
+import Api (requestPages)
 import Control.Monad.Aff (Aff)
-import Control.Monad.Trans.Class (lift)
+import Control.Monad.Aff (Aff, delay)
+import Control.Monad.Aff (launchAff, Aff, Fiber)
+import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log, logShow)
+import Control.Monad.Maybe.Trans
+import Control.Monad.Trans.Class (lift)
+import DOM (DOM) as DOM
+import DOM.Classy.Element (getAttribute)
+import DOM.HTML (window) as DOM
+import DOM.HTML.Document (body) as DOM
+import DOM.HTML.Types (htmlDocumentToParentNode)
+import DOM.HTML.Types (htmlElementToElement) as DOM
+import DOM.HTML.Window (document) as DOM
+import DOM.Node.Document (getElementsByClassName)
+import DOM.Node.ParentNode (querySelector, QuerySelector(..))
+import Data.Foldable (for_, traverse_)
+import Data.List as L
+import Network.HTTP.Affjax (AJAX, affjax, post, defaultRequest, post_)
+import PageList as PageList
 import React as R
 import React.DOM as R
 import React.DOM.Props as RP
-import Thermite as T
 import ReactDOM as ReactDOM
-import DOM.Node.Document (getElementsByClassName)
-import DOM.HTML.Types (htmlDocumentToParentNode)
-
-import DOM (DOM) as DOM
-import DOM.HTML (window) as DOM
-import DOM.HTML.Document (body) as DOM
-import DOM.HTML.Types (htmlElementToElement) as DOM
-import DOM.HTML.Window (document) as DOM
-import Data.Foldable (for_, traverse_)
-import DOM.Node.ParentNode (querySelector, QuerySelector(..))
-
-import PageList as PageList
+import Thermite as T
+import DOM.Node.Types (Element)
+--import DOM.Classy.ParentNode (querySelector)
 
 type State = Tuple (Maybe Int) PageList.State
 
@@ -47,20 +54,26 @@ _PageListAction = prism' PageListAction unwrap
                     unwrap (PageListAction pageListAction) = Just pageListAction
                     unwrap _ = Nothing
 
-initialState :: State
-initialState = Tuple Nothing PageList.initialState
-
 
 getElement s
-  = (querySelector (QuerySelector s) <<< htmlDocumentToParentNode <=< DOM.document) =<< DOM.window
+ = (querySelector (QuerySelector s) <<< htmlDocumentToParentNode <=< DOM.document) =<< DOM.window
 
 
-main = void do
-  let component = T.createClass spec initialState
+main username fieldname = launchAff do
 
-  container <- getElement ".pages-list"
-  traverse_
-    (ReactDOM.render (R.createFactory component unit))
-    container
+  eitherPages <- requestPages username fieldname
 
+  void $ liftEff $ runMaybeT do
+    container <- MaybeT $ getElement ".pages-list"
+    pages <- MaybeT $ pure $ hush eitherPages
+    
+    let initialState = PageList.initialState
+                       username
+                       fieldname
+                       pages
 
+    let component = (T.createClass PageList.spec initialState)
+
+    lift $ ReactDOM.render
+      (R.createFactory component initialState)
+      container
