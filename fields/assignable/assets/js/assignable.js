@@ -137,12 +137,15 @@
     }
   }
 
-  var el = document.querySelector('.assignable-field');
+    
+  window.addEventListener('load', () => {
+    var el = document.querySelector('.assignable-field');
 
-  if (el) {
-    var pageUuid = el.getAttribute('data-page-uuid');
+    if (el) {
+      var pageUuid = el.getAttribute('data-page-uuid');
 
-    var a = new Assigner(el, pageUuid);
-  }
+      var a = new Assigner(el, pageUuid);
+    }
+  });
 
 })();
