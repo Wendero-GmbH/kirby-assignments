@@ -23,6 +23,10 @@ function add(\User $user, $field, \Page $page) {
     $user->update([
       $field => array_values($copy)
     ]);
+
+    if (function_exists('autogit')) {
+      autogit()->save('file.update', $user->file());
+    }
   }
 }
 
@@ -43,6 +47,10 @@ function remove(\User $user, $field, \Page $page) {
     $user->update([
       $field => array_values($copy)
     ]);
+
+    if (function_exists('autogit')) {
+      autogit()->save('file.update', $user->file());
+    }
   }
 }
 
