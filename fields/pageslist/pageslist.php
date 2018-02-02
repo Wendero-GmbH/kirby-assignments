@@ -2,6 +2,7 @@
 
 class PagesListField extends BaseField {
 
+  public $help = '';
 
   static public $assets = array(
     'js' => array(
@@ -21,32 +22,29 @@ class PagesListField extends BaseField {
     $this->max         = false;
   }
 
-  
-  public function input() {
-    $input = parent::input();
-    return $input;
-  }
-
   public function content() {
+    if (!($this->model instanceof \User)) {
+      $content = parent::content();
+      $content->text('Fields of this type can only be attached to users.');
+      return $content;
+    }
+
     $content = parent::content();
     $content->addClass('pages-list');
 
     $str = $content->toString();
 
-    $str .= js('/assets/js/pagelist.js');
-
-    $str .= '<style type="text/css">.active { color: green; }</style>';
-
-    //$content .= css('/panel/assets/css/pagelist.css');
+    $str .= <<<HTML
+<script>
+  PageList.main("{$this->model->username}")("{$this->name}")();
+</script>
+HTML;
 
     return $str;
   }
 
   public function validate() {
-
     return true;
-
   }
-
 }
 

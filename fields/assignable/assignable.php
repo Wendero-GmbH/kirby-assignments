@@ -5,6 +5,9 @@ class AssignableField extends BaseField {
   static public $assets = [
     'js' => [
       'assignable.js'
+    ],
+    'css' => [
+      'assignable.css'
     ]
   ];
 
@@ -16,10 +19,6 @@ class AssignableField extends BaseField {
     $uuid = $this->page->uuid()->value;
 
     $content = '<div data-page-uuid="' . $uuid . '" class="assignable-field"></div>';
-
-    $content .= '<script src="/assets/js/assignable.js"></script>';
-
-    $content .= css('/panel/assets/css/assignable.css');
 
     return $content;
   }
