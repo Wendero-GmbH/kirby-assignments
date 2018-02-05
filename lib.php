@@ -78,10 +78,13 @@ function assign_page_to_user(User $user, Page $page) {
  * @param User $user
  * @return Array of Page objects
  */
-function due_assignments(User $user) {
-  // missing
+function topics_assigned_to_user(User $user) {
+  return Pagelist\all($user, TOPICS_FIELD);
 }
 
+function get_infobits(Page $topic) {
+  return $topic->children();
+}
 
 function unassign_page(User $user, Page $page) {
   Pagelist\remove($user, TOPICS_FIELD, $page);
@@ -116,4 +119,38 @@ function user_has_read_page(User $user, Page $page) {
   $pagesRead = ifpred($user->pages_read, 'is_array', []);
   $hasRead = in_array(intval($page->uuid()->value), $pagesRead);
   return $hasRead;
+}
+
+/**
+ * @return bool
+ */
+function has_read_infobit(User $user, Page $infobit) {
+  return Pagelist\has($user, INFOBITS_FIELD, $infobit);
+}
+
+/**
+ * Returns a short summary or gist for the given infobit.
+ * @param Page $infobit
+ * @return string
+ */
+function infobit_gist(Page $infobit) {
+  return 'Lorem ipsum dolor sit amet';
+}
+
+/**
+ * Returns a boolean indicating if the user has incomplete assignments.
+ * @return bool
+ */
+function has_assignments(User $user) {
+  foreach (topics_assigned_to_user(kirby()->site()->user()) as $topic) {
+
+    foreach (get_infobits($topic) as $infobit) {
+
+      if (!has_read_infobit(kirby()->site()->user(), $infobit)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
