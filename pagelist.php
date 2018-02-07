@@ -74,6 +74,8 @@ function has(\User $user, $field, \Page $page) {
  * @return array
  */
 function all(\User $user, $field) {
+  if (is_null($user->$field)) return [];
+
   return array_map('get_page_by_uuid', $user->$field);
 }
 
