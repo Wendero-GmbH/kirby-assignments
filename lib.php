@@ -5,7 +5,11 @@
  * @return string
  */
 function generate_page_uuid() {
-  return strval(random_int(2**10, 2**31));
+  $username = kirby()->site()->user()->username();
+
+  $str = strval(time()) . $username;
+
+  return md5($str);
 }
 
 /**
