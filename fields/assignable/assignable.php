@@ -20,6 +20,19 @@ class AssignableField extends BaseField {
 
     $content = '<div data-page-uuid="' . $uuid . '" class="assignable-field"></div>';
 
+    $content .= <<<HTML
+
+<script>
+(function () {
+  let el = document.querySelector('.assignable-field');
+  if (el) {
+    let pageUuid = el.getAttribute('data-page-uuid');
+    let assigner = new Assigner(el, pageUuid);
+  }
+})();
+</script>
+HTML;
+
     return $content;
   }
 

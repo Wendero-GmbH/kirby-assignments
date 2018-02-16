@@ -137,15 +137,5 @@
     }
   }
 
-    
-  window.addEventListener('load', () => {
-    var el = document.querySelector('.assignable-field');
-
-    if (el) {
-      var pageUuid = el.getAttribute('data-page-uuid');
-
-      var a = new Assigner(el, pageUuid);
-    }
-  });
-
+  window.Assigner = Assigner;
 })();
