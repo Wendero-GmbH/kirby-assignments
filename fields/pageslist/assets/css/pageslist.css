@@ -135,3 +135,50 @@ input[type=checkbox]:checked ~ .page-tree__children {
   flex-grow: 1;
   padding: 0 0.5rem;
 }
+
+
+/* ------------------------------------ */
+
+.users-list {
+  
+}
+
+.users-list__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.users-list__item > * {
+  margin: 0.3rem;
+}
+
+.users-list__remind {
+  border: none;
+  background: rgba(0, 0, 0, 0);
+}
+
+.users-list__name {
+  flex-basis: 50%;
+}
+
+/* ------------------------------------ */
+
+.ratio-bar {
+  display: flex;
+  min-width: 30px;
+  height: 10px;
+  flex-basis: 50%;
+}
+
+.ratio-bar__piece {
+
+}
+
+.ratio-bar__piece--left {
+  background: #8dae28;
+}
+
+.ratio-bar__piece--right {
+  background: #b3000a;
+}

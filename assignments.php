@@ -23,3 +23,4 @@ kirby()->hook('panel.page.create', function ($page) {
 kirby()->set('field', 'pageslist', __DIR__ . '/fields/pageslist');
 kirby()->set('field', 'assignable', __DIR__ . '/fields/assignable');
 kirby()->set('snippet', 'my-assignments', __DIR__ . '/snippets/my-assignments.php');
+kirby()->set('widget', 'overview', __DIR__ . '/widgets/overview');

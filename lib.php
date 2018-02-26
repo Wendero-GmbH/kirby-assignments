@@ -115,10 +115,12 @@ function user_read_page(User $user, Page $page) {
 }
 
 /**
+ * @param User $user
+ * @param Page $topic
  * @return bool
  */
-function page_assigned_to_user(User $user, Page $page) {
-  return Pagelist\has($user, TOPICS_FIELD, $page);
+function page_assigned_to_user(User $user, Page $topic) {
+  return Pagelist\has($user, TOPICS_FIELD, $topic);
 }
 
 /**

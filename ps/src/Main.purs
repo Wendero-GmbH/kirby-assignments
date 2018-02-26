@@ -1,4 +1,4 @@
-module Main (main) where
+module Main (main, widget) where
 
 import Prelude
 
@@ -34,7 +34,7 @@ import Thermite as T
 import Api (requestTree)
 import PageList as PageList
 import Data.Page
-
+import Widget as Widget
 
 type State = Tuple (Maybe Int) PageList.State
 
@@ -77,3 +77,5 @@ main username fieldname = launchAff do
     lift $ ReactDOM.render
       (R.createFactory component initialState)
       container
+
+widget = Widget.main

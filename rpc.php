@@ -196,3 +196,51 @@ kirby()->set('rpc', [
     return $result;
   }
 ]);
+
+kirby()->set('rpc', [
+  'method' => 'get_users',
+  'roles' => ['admin'],
+  'action' => function () {
+    $res = [];
+
+    $completed = new Ds\Map;
+    $incomplete = new Ds\Map;
+
+    foreach (get_topics() as $topic) {
+
+      if (0 === $topic->children()->count()) continue;
+
+      foreach (kirby()->site()->users()->data as $user) {
+
+        $assigned = page_assigned_to_user($user, $topic);
+
+        if ($assigned) {
+
+          $done = user_has_read_all_infobits($user, $topic);
+
+          if ($done) {
+            $completed->put($user->username, 1 + $completed->get($user->username, 0));
+          }
+          else {
+            $incomplete->put($user->username, 1 + $incomplete->get($user->username, 0));
+          }
+
+        }
+      }
+    }
+
+
+    foreach (kirby()->site()->users()->data as $user) {
+      $r = new stdClass;
+      $r->name = $user->username;
+      $r->completed = $completed->get($user->username, 0);
+      $r->incomplete = $incomplete->get($user->username, 0);
+
+      if (0 < $r->incomplete) {
+        $res[] = $r;
+      }
+    }
+
+    return $res;
+  }
+]);
