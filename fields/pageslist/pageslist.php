@@ -9,7 +9,7 @@ class PagesListField extends BaseField {
       'dist.js'
     ),
     'css' => array(
-      'structure.css'
+      'pageslist.css'
     )
   );
 

@@ -1,0 +1,137 @@
+.page-tree {
+  border: 2px solid #ddd;
+  background: #fff;
+  padding: 0.5rem;  
+}
+
+.page-tree__node {
+
+}
+
+.page-tree__node-header {
+  display: block;
+  cursor: pointer;
+}
+
+.page-tree__node-title {
+  padding-left: 0.5rem;
+}
+
+.page-tree__node--always-expanded > .page-tree__children {
+  opacity: 1.0;
+  display: block !important;
+}
+
+.page-tree__collapser-checkbox {
+  visibility: hidden;
+  position: absolute;
+}
+
+.page-tree__topic {
+  display: flex;
+  color: rgba(0, 0, 0, 0.6);
+  transition: all 0.25s;
+  align-items: center;
+  padding: 0.1rem;
+}
+
+.page-tree__edit-page-link {
+  transition: opacity 0.25s;
+  opacity: 0.0;
+  padding-left: 0.5rem;
+}
+
+.page-tree__topic--active {
+  color: #000;
+}
+
+.page-tree__topic:hover {
+  background-color: #ddd;
+  border-radius: 2px;
+}
+
+.page-tree__topic:hover > .page-tree__edit-page-link {
+  opacity: 1.0;
+}
+
+.page-tree__topic-title {
+  padding-left: 0.5rem;
+  flex-grow: 1;
+  transition: all 0.25s;
+  cursor: pointer;
+}
+
+.page-tree__children {
+  display: none;
+  padding-left: 1rem;
+}
+
+.badge {
+  padding: 0 0.5rem;
+}
+
+input[type=checkbox]:checked ~ .page-tree__children {
+  display: block;
+}
+
+
+
+.my-modal {
+  z-index: 1001;
+}
+
+.my-modal__box {
+  max-height: calc(100% - 100px);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  z-index: 1003;
+}
+
+.my-modal__box__header {
+  padding: 1rem;
+  padding-bottom: 0.5rem;
+}
+
+.my-modal__box__body {
+  padding: 1rem;
+  padding-top: 0.5rem;
+}
+
+.my-modal__layer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background: #000;
+  opacity: 0.5;
+  z-index: 1002;
+}
+
+.infobits-list {
+  
+}
+
+.infobits-list__item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem;
+  align-items: center;
+}
+
+.infobits-list__item .fa-check {
+  color: green;
+}
+
+.infobits-list__item .fa-times {
+  color: orange;
+}
+
+.infobits-list__item__title {
+  flex-grow: 1;
+  padding: 0 0.5rem;
+}

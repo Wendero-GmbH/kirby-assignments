@@ -1,6 +1,75 @@
 <?php
 
 
+/**
+ * @param User $user
+ * @param Page $page
+ * @return stdClass or false
+ */
+function get_topics_rec(User $user, Page $page) {
+
+  switch ($page->template()) {
+
+  case 'infobit':
+    throw new Exception('unexpected infobit' . $page->id());
+
+  case 'topic':
+    $r = new stdClass;
+    $r->type = 'topic';
+    $r->id = $page->id();
+    $r->title = $page->title()->value;
+    $r->uuid = $page->uuid()->value;
+    $r->active = Pagelist\has($user, TOPICS_FIELD, $page);
+    $r->size = $page->children()->count();
+    $r->done = 0;
+    foreach ($page->children() as $child) {
+      if (Pagelist\has($user, INFOBITS_FIELD, $child)) {
+        $r->done++;
+      }
+    }
+    return $r;
+    break;
+
+  default:
+    $children = [];
+
+    foreach ($page->children() as $child) {
+      
+      $tree = get_topics_rec($user, $child);
+
+      if ($tree) {
+        $children[] = $tree;
+      } 
+    }
+
+    if (0 < count($children)) {
+      $node = new stdClass;
+      $node->type = 'node';
+      $node->id = $page->id();
+      $node->children = $children;
+      $node->title = $page->title()->value;
+      return $node;
+    }
+    else {
+      return false;
+    }
+  }
+}
+
+
+kirby()->set('rpc', [
+  'method' => 'get_topics',
+  'roles' => ['admin'],
+  'action' => function ($username) {
+    
+    $user = kirby()->site()->users()->find($username);
+
+    $rootPage = kirby()->site();
+
+    return get_topics_rec($user, $rootPage);
+  }
+]);
+
 kirby()->set('rpc', [
   'method' => 'rpc_unassign_page',
   'roles' => ['admin'],
@@ -34,7 +103,7 @@ kirby()->set('rpc', [
   'action' => function ($pageUuid) {
     $user = kirby()->site()->user();
 
-    $page = get_page_by_uuid(intval($pageUuid));
+    $page = get_page_by_uuid($pageUuid);
 
     user_read_page($user, $page);
 
@@ -90,49 +159,6 @@ kirby()->set('rpc', [
     Pagelist\add($user, $field, $page);
   }
 ]);
-
-kirby()->set('rpc', [
-  'method' => 'user_field_get_pages',
-  'roles' => ['admin'],
-  'action' => function ($username, $field) {
-    $topics = kirby()
-            ->site()
-            ->index()
-            ->filterBy('template', 'topic');
-
-    $r = [];
-
-    $user = kirby()->site()->users()->find($username);
-
-    foreach ($topics as $topic) {
-
-      $completedIds = Pagelist\ids($user, INFOBITS_FIELD);
-
-      $infobits = $topic->children();
-
-      $completed = 0;    
-
-      foreach ($infobits as $infobit) {
-        $uuid = $infobit->uuid()->value;
-
-        if (in_array($uuid, $completedIds)) {
-          $completed++;
-        }
-      }
-
-      $r[] = [
-        'title' => $topic->title()->value,
-        'uuid' => $topic->uuid()->value,
-        'active' => Pagelist\has($user, $field, $topic),
-        'infobits' => $infobits->count(),
-        'completed' => $completed
-      ];
-
-    }
-
-    return $r;
-  }
-]);
              
 
 kirby()->set('rpc', [
@@ -144,5 +170,29 @@ kirby()->set('rpc', [
     $page = get_page_by_uuid($pageUuid);
 
     Pagelist\remove($user, $field, $page);  
+  }
+]);
+
+kirby()->set('rpc', [
+  'method' => 'topic_get_infobits',
+  'roles' => ['admin'],
+  'action' => function ($username, $topicId) {
+    $user = kirby()->site()->users()->find($username);
+
+    $topic = kirby()->site()->index()->find($topicId);
+
+    $result = [];
+
+    foreach ($topic->children() as $infobit) {
+      
+      $t = new stdClass;
+      $t->title = $infobit->title()->value;
+      $t->id = $infobit->id();
+      $t->done = Pagelist\has($user, INFOBITS_FIELD, $infobit);
+
+      $result[] = $t;
+    }
+
+    return $result;
   }
 ]);

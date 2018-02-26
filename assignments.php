@@ -15,7 +15,7 @@ require_once __DIR__ . '/rpc.php';
 kirby()->hook('panel.page.create', function ($page) {
   if ($page->content()->has(KIRBY_ASSIGNMENTS_UUID)) {
     $page->update([
-      KIRBY_ASSIGNMENTS_UUID => generate_page_uuid()
+      KIRBY_ASSIGNMENTS_UUID => generate_page_uuid($page)
     ]);
   }
 });

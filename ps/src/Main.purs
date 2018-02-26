@@ -1,15 +1,7 @@
 module Main (main) where
 
-import Data.Either
-import Data.Lens
-import Data.Maybe
-import Data.Page
-import Data.Tuple
 import Prelude
 
-import Api (requestPages)
-import Control.Monad.Aff (Aff)
-import Control.Monad.Aff (Aff, delay)
 import Control.Monad.Aff (launchAff, Aff, Fiber)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
@@ -25,17 +17,24 @@ import DOM.HTML.Types (htmlElementToElement) as DOM
 import DOM.HTML.Window (document) as DOM
 import DOM.Node.Document (getElementsByClassName)
 import DOM.Node.ParentNode (querySelector, QuerySelector(..))
+import DOM.Node.Types (Element)
+import Data.Either
 import Data.Foldable (for_, traverse_)
+import Data.Lens
 import Data.List as L
-import Network.HTTP.Affjax (AJAX, affjax, post, defaultRequest, post_)
-import PageList as PageList
+import Data.Maybe
+import Data.Tuple
+import Network.HTTP.Affjax (AJAX, affjax)
 import React as R
 import React.DOM as R
 import React.DOM.Props as RP
 import ReactDOM as ReactDOM
 import Thermite as T
-import DOM.Node.Types (Element)
---import DOM.Classy.ParentNode (querySelector)
+
+import Api (requestTree)
+import PageList as PageList
+import Data.Page
+
 
 type State = Tuple (Maybe Int) PageList.State
 
@@ -61,16 +60,17 @@ getElement s
 
 main username fieldname = launchAff do
 
-  eitherPages <- requestPages username fieldname
+  eitherTree <- requestTree username
 
   void $ liftEff $ runMaybeT do
     container <- MaybeT $ getElement ".pages-list"
-    pages <- MaybeT $ pure $ hush eitherPages
-    
+
+    tree <- MaybeT $ pure $ hush eitherTree
+
     let initialState = PageList.initialState
                        username
                        fieldname
-                       pages
+                       tree
 
     let component = (T.createClass PageList.spec initialState)
 

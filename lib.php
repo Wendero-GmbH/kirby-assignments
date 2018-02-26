@@ -1,13 +1,81 @@
 <?php
 
+function cleanup_topics() {
+  
+  $topics = get_topics();
+
+  foreach ($topics as $topic) {
+
+    if (true || !$topic->uuid()->value ||
+        !$topic->has('uuid') ||
+        $topic->uuid()->value == '') {
+
+      error_log('setting uuid for ' . $topic->id());
+
+      $topic->update([
+        'uuid' => generate_page_uuid($topic)
+      ]);
+    }
+  }
+}
+
+function cleanup_infobits() {
+
+  foreach (get_all_infobits() as $infobit) {
+
+    if (true || !$infobit->uuid()->value ||
+        !$infobit->has('uuid') ||
+        $infobit->uuid()->value == '') {
+
+      $infobit->update([
+        'uuid' => generate_page_uuid($infobit)
+      ]);
+
+    }
+
+  }
+
+}
+
+function get_all_infobits() {
+  return kirby()
+    ->site()
+    ->index()
+    ->filterBy('template', 'infobit');
+}
+
+
+
+function get_topics() {
+  $topics = kirby()
+          ->site()
+          ->index()
+          ->filterBy('template', 'topic');
+
+  $ts = [];
+
+
+  foreach ($topics as $topic) {
+
+    if ($topic->has('assignable')
+        && $topic->has('uuid')) {
+
+      $ts[] = $topic;
+    }
+
+  }
+
+  return $ts;
+}
+
 /**
  * Generates a uuid.
  * @return string
  */
-function generate_page_uuid() {
+function generate_page_uuid(\Page $page) {
   $username = kirby()->site()->user()->username();
 
-  $str = strval(time()) . $username;
+  $str = strval(time()) . $username . strval(rand()) . $page->id();
 
   return md5($str);
 }
@@ -37,17 +105,10 @@ function user_has_read_all_infobits(User $user, Page $topic) {
     });
 }
 
-function ifpred($x, $predicate, $default) {
-  if (call_user_func($predicate, $x)) {
-    return $x;
-  }
-  else {
-    return $default;
-  }
-}
-
 /**
  * Mark the given page as read by the user.
+ * @param User $user
+ * @param Page $user
  */
 function user_read_page(User $user, Page $page) {
   Pagelist\add($user, INFOBITS_FIELD, $page);
@@ -115,17 +176,10 @@ function topic_completion(\User $user, \Page $topic) {
   
 }
 
-
 /**
- * @return bool
- */
-function user_has_read_page(User $user, Page $page) {
-  $pagesRead = ifpred($user->pages_read, 'is_array', []);
-  $hasRead = in_array(intval($page->uuid()->value), $pagesRead);
-  return $hasRead;
-}
-
-/**
+ * Returns a boolean indicating if the given user read the given infobit
+ * @param User $user
+ * @param Page $infobit
  * @return bool
  */
 function has_read_infobit(User $user, Page $infobit) {

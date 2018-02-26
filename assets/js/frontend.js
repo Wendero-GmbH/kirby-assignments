@@ -93,6 +93,13 @@
 
   }
 
-  initPanel(document.querySelector('.infobit-panel'));
-
+    window.addEventListener('load', () => {
+      window.setTimeout(() => {
+        let el = document.querySelector('.infobit-panel')
+        
+        if (el) {
+          initPanel(el);
+        }
+      }, 1000);
+    });
 })();
