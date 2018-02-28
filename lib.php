@@ -170,15 +170,6 @@ function part_of_assignment(Page $page) {
 
 
 /**
- * @param \User $user
- * @param \Page $topic
- * @return float 
- */
-function topic_completion(\User $user, \Page $topic) {
-  
-}
-
-/**
  * Returns a boolean indicating if the given user read the given infobit
  * @param User $user
  * @param Page $infobit
