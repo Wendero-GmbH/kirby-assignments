@@ -188,7 +188,7 @@ kirby()->set('rpc', [
       $t = new stdClass;
       $t->title = $infobit->title()->value;
       $t->id = $infobit->id();
-      $t->done = Pagelist\has($user, INFOBITS_FIELD, $infobit);
+      $t->done = has_read_infobit($user, $infobit);
 
       $result[] = $t;
     }
