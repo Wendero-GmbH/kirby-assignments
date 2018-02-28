@@ -203,8 +203,8 @@ kirby()->set('rpc', [
   'action' => function () {
     $res = [];
 
-    $completed = new Ds\Map;
-    $incomplete = new Ds\Map;
+    $completed = [];
+    $incomplete = [];
 
     foreach (get_topics() as $topic) {
 
@@ -219,10 +219,18 @@ kirby()->set('rpc', [
           $done = user_has_read_all_infobits($user, $topic);
 
           if ($done) {
-            $completed->put($user->username, 1 + $completed->get($user->username, 0));
+            $crnt = array_key_exists($user->username, $completed)
+                  ? $completed[$user->username]
+                  : 0;
+
+            $completed[$user->username] = $crnt + 1;
           }
           else {
-            $incomplete->put($user->username, 1 + $incomplete->get($user->username, 0));
+            $crnt = array_key_exists($user->username, $incomplete)
+                  ? $incomplete[$user->username]
+                  : 0;
+
+            $incomplete[$user->username] = $crnt + 1;
           }
 
         }
@@ -233,8 +241,12 @@ kirby()->set('rpc', [
     foreach (kirby()->site()->users()->data as $user) {
       $r = new stdClass;
       $r->name = $user->username;
-      $r->completed = $completed->get($user->username, 0);
-      $r->incomplete = $incomplete->get($user->username, 0);
+      $r->completed = array_key_exists($user->username, $completed)
+                    ? $completed[$user->username]
+                    : 0;
+      $r->incomplete = array_key_exists($user->username, $incomplete)
+                     ? $incomplete[$user->username]
+                     : 0;
 
       if (0 < $r->incomplete) {
         $res[] = $r;
