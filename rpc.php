@@ -198,6 +198,47 @@ kirby()->set('rpc', [
 ]);
 
 kirby()->set('rpc', [
+  'method' => 'notify_user',
+  'roles' => ['admin'],
+  'action' => function ($username) {
+    $user = kirby()->site()->users()->find($username);
+
+    $currentUser = kirby()->site()->user();
+
+    $body = "Hi $user->firstname,
+
+$currentUser->firstname is asking you to take a look at the following articles and confirm that you read them:
+
+";
+
+    foreach (get_unread_infobits($user) as $infobit) {
+      $body .= " * " . $infobit->title()->value . "\n "
+            . $infobit->url() . "\n";
+    }
+
+    $email = email(array(
+      'to'      => $user->email,
+      'from'    => c::get('assignments.sender_email'),
+      'subject' => 'Assignments',
+      'body'    => $body,
+      'service' => 'mailgun',
+      'options' => array(
+        'key'    => c::get('assignments.mailgun_api_key'),
+        'domain' => c::get('assignments.mailgun_domain')
+      )
+    ));
+
+    if($email->send()) {
+      error_log('The email has been sent via Mailgun');
+      return true;
+    } else {
+      error_log($email->error()->message());
+      return false;
+    }
+  }
+]);
+
+kirby()->set('rpc', [
   'method' => 'get_users',
   'roles' => ['admin'],
   'action' => function () {

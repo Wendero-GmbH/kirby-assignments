@@ -26,15 +26,22 @@ import React.DOM as R
 import React.DOM.Props as RP
 import ReactDOM as ReactDOM
 import Thermite as T
+import Data.Newtype (wrap, unwrap, class Newtype)
+import Control.Monad.Trans.Class (lift)
 
-data User = User { name :: String
+newtype Username = Username String
+
+derive instance newtypeUsername :: Newtype Username _
+
+data User = User { name :: Username
                  , incomplete :: Int
                  , completed :: Int
                  }
 
 data State = State { users :: Array User }
 
-data Action = NoOp
+data Action = NotifyUser Username
+            | NoOp
 
 icon :: String -> R.ReactElement
 icon name =
@@ -51,34 +58,35 @@ render dispatch _ (State { users }) _ =
   [ R.div
     []
     [ if Array.null users
-      then R.text "There are not users with incomplete assignments"
-      else renderUsers users
+      then R.text "There are no users with incomplete assignments"
+      else renderUsers dispatch users
     ]
   ]
 
-renderUsers :: Array User -> R.ReactElement
-renderUsers users =
+--renderUsers :: Array User -> R.ReactElement
+renderUsers dispatch users =
   R.div
   [ RP.className "users-list" ]
-  (map renderUser users)
+  (map (renderUser dispatch) users)
 
-renderUser :: User -> R.ReactElement
-renderUser (User { name, completed, incomplete }) =
+--renderUser :: User -> R.ReactElement
+renderUser dispatch (User { name, completed, incomplete }) =
   R.div
   [ RP.className "users-list__item" ]
   [ icon "user"
 
   , R.a
     [ RP.className "users-list__name"
-    , RP.href $ userPath name
+    , RP.href $ userPath $ unwrap name
     ]
-    [ R.text name ]
+    [ R.text $ unwrap name ]
 
   , ratioBar completed incomplete
 
   , R.button
     [ RP.className "users-list__remind"
     , RP.title "Send a reminder"
+    , RP.onClick \_ -> dispatch (NotifyUser name)
     ]
     [ icon "bell" ]
   ]
@@ -108,15 +116,36 @@ initialState :: Array User -> State
 initialState users = State { users: users }
 
 performAction :: T.PerformAction _ State _ Action
+
+performAction (NotifyUser username) _ _ = do
+  void $ lift $ notifyUser username
+
 performAction _ _ _ = do
   liftEff $ log "performAction called"
 
 getElement s
  = (querySelector (QuerySelector s) <<< htmlDocumentToParentNode <=< DOM.document) =<< DOM.window
 
+notifyUser :: forall eff. Username -> Aff ( ajax :: AJAX, console :: CONSOLE | eff ) Boolean
+notifyUser username = do
+  ({ status, response }) <- post "/jsonrpc" $ Argo.stringify methodCall
+  pure $ status == (StatusCode 200)
+
+  where
+
+    methodCall :: Argo.Json
+    methodCall = Argo.fromObject $ StrMap.fromFoldable
+                 [ Tuple "jsonrpc" $ Argo.fromString "2.0"
+                 , Tuple "params" $ Argo.fromArray
+                   [ Argo.fromString (unwrap username) ]
+                 , Tuple "method" $ Argo.fromString "notify_user"
+                 , Tuple "id" $ Argo.fromNumber 1.0
+                 ]
+
 requestUsers :: forall eff. Aff ( ajax :: AJAX | eff ) (Either String (Array User))
 requestUsers = do
   ({ status, response }) <- post "/jsonrpc" $ Argo.stringify req
+  
   pure $ parseResp response
 
   where
@@ -156,7 +185,7 @@ requestUsers = do
                     (StrMap.lookup "incomplete" >=> Argo.toNumber)
                     raw
 
-      pure $ User { name
+      pure $ User { name: wrap name
                   , completed: Int.floor completed
                   , incomplete: Int.floor incomplete
                   }

@@ -205,3 +205,34 @@ function has_assignments(User $user) {
 
   return false;
 }
+
+/**
+ * Returns an array of infobits the user has been asked to read
+ * and has not yet read.
+ * @param User $user
+ * @return Array
+ */
+function get_unread_infobits(User $user) {
+  $result = [];
+
+   foreach (kirby()->site()->index()->data as $topic) {
+
+     if ($topic->template() !== 'topic') continue;
+
+     if (!Pagelist\has($user, TOPICS_FIELD, $topic)) continue;
+
+     
+     error_log($topic->title()->value);
+
+     foreach ($topic->children() as $infobit) {
+       $hasRead = Pagelist\has($user, INFOBITS_FIELD, $infobit);
+
+       if (!$hasRead) {
+         $result[] = $infobit;
+       }
+     }
+   }
+   
+   return $result;
+}
+
