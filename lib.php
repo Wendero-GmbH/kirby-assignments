@@ -236,3 +236,12 @@ function get_unread_infobits(User $user) {
    return $result;
 }
 
+/**
+ * Returns the number of unread infobits that have been assigned
+ * to the given user.
+ * @param User $user
+ * @return int
+ */
+function count_unread_infobits(User $user) {
+  return count(get_unread_infobits($user));
+}
