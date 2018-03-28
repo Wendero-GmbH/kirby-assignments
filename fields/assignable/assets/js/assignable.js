@@ -5,10 +5,12 @@
   class Assigner {
 
     constructor(el, pageUuid) {
+      this.reloadBound_ = this.reload_.bind(this);
+      this.handleClickBound_ = this.handleClick_.bind(this);
       this.el_ = el;
       this.pageUuid_ = pageUuid;
       this.users_ = [];
-      this.handleClickBound_ = this.handleClick_.bind(this);
+
       this.el_.addEventListener('click', this.handleClickBound_);
       this.reload_();
       this.el_.classList.add('assignable-field');
@@ -29,18 +31,31 @@
       let user = ev.target.dataset.user;
       let status = ev.target.dataset.status;
 
-      if ('incomplete' === status) {
-        Assigner
-          .unassignUser(user, this.pageUuid_)
-          .then(() => this.reload_());
-      }
-      else if ('unassigned' === status) {
+      if ('unassigned' === status) {
         Assigner
           .assignUser(user, this.pageUuid_)
-          .then(() => this.reload_());
+          .then(this.reloadBound_);
       }
       else {
-        console.log('the user already completed the assignment...');
+        Assigner
+          .unassignUser(user, this.pageUuid_)
+          .then(this.reloadBound_);
+      }
+    }
+
+    static statusStr(status) {
+      switch (status) {
+      case 'unassigned':
+        return 'The topic has not been assigned to this user';
+        break;
+      case 'incomplete':
+        return 'The user has not completed the assigned';
+        break;
+      case 'done':
+        return 'The user has read all infobits for this topic';
+        break;
+      default:
+        throw new Error(`Invalid status ${status}`);
       }
     }
 
@@ -51,8 +66,9 @@
 
         let el = Assigner.renderUser_(1, user['name'], user['status']);
 
-        this.el_.appendChild(el);
 
+
+        this.el_.appendChild(el);
       });
     }
 
@@ -133,6 +149,7 @@
       el.dataset.user = name;
       el.dataset.status = status;
       el.innerHTML = `${name}`;
+      el.title = Assigner.statusStr(status);
       return el;
     }
   }
