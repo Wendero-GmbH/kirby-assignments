@@ -51,6 +51,14 @@ icon name =
   [ RP.className $ "icon fa fa-" <> name ]
   []
 
+iconWithTooltip :: String -> String -> R.ReactElement
+iconWithTooltip name tooltip =
+  R.i
+  [ RP.className $ "icon fa fa-" <> name
+  , RP.title tooltip
+  ]
+  []
+
 badge :: String -> R.ReactElement
 badge content =
   R.i
@@ -87,12 +95,12 @@ renderTree depth dispatch (Topic { title, id, active, uuid, done, size }) =
     [ RP.className "page-tree__topic-title"
     , if 0 < size
       then RP.onClick \_ -> dispatch (ViewTopic id)
-      else RP.title "This topic has no infobits."
+      else RP.title noInfobitsMsg
     ]
     [ R.text title ]
 
   , if 0 == size
-    then icon "exclamation-triangle"
+    then iconWithTooltip "exclamation-triangle" noInfobitsMsg
     else R.text ""
 
   , if active && (0 < size) 
@@ -108,6 +116,9 @@ renderTree depth dispatch (Topic { title, id, active, uuid, done, size }) =
     ]
   ]
 
+  where
+    noInfobitsMsg = "This topic has no infobits."
+    
 
 
 renderTree depth dispatch (Node { title, id, children }) =
