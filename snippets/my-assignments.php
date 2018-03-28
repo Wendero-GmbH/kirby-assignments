@@ -46,8 +46,7 @@ $unreadInfobits = get_unread_infobits(kirby()->site()->user());
 
       <?php endforeach; ?>
 
-      <?php endif; ?>
-
     </div>
+    <?php endif; ?>
   </div>
 </div>
